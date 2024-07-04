@@ -17,7 +17,9 @@ public class MIFWhitelistConfigModel {
     public String[] noAccessGroupDisconnectMessage = new String[]{
             "<red>You don't have a access pass to this server!",
             "<red>Please buy the pass to join."
-    };    @RestartRequired
+    };
+
+    @RestartRequired
     public String[] noBypassSlotsGroupDisconnectMessage = new String[]{
             "<red>You don't have a bypass slots pass to this server!",
             "<red>Please buy the pass to join on full server."
