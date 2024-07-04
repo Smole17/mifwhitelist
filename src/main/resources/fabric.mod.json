@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "mifwhitelist",
+  "version": "${version}",
+  "name": "mifwhitelist",
+  "description": "Server-side mod, that allows to join a server with specific LuckPerms group",
+  "authors": [
+    "Smole17"
+  ],
+  "contact": {
+    "repo": "https://github.com/Smole17/mifwhitelist"
+  },
+  "license": "unlicense",
+  "environment": "server",
+  "entrypoints": {
+    "server": [
+      "ru.smole.mifwhitelist.MIFWhitelist"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}",
+    "owo": ">=${owo_version}",
+    "luckperms": ">=${luckperms_version}"
+  }
+}
