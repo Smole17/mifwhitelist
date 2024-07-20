@@ -20,25 +20,29 @@ public class PlayerJoinHandler {
         LuckPermsUtil.getUser(
                 handler.player.getUuid(),
                 user -> checkGroups(user.getInheritedGroups(user.getQueryOptions()), server,
-                        () -> handler.disconnect(noAccessGroupDisconnectMessage()),
-                        () -> handler.disconnect(noBypassSlotsGroupDisconnectMessage()))
-        );
+                        () -> handler.disconnect(message(MIFWhitelist.CONFIG.noAccessGroupDisconnectMessage())),
+                        () -> handler.disconnect(message(MIFWhitelist.CONFIG.noBypassSlotsGroupDisconnectMessage())),
+                        () -> handler.disconnect(message(MIFWhitelist.CONFIG.noBypassMaintenanceGroupDisconnectMessage()))
+        ));
     }
 
-    private Text noAccessGroupDisconnectMessage() {
-        return Arrays.stream(MIFWhitelist.CONFIG.noAccessGroupDisconnectMessage())
+    private Text message(String[] message) {
+        return Arrays.stream(message)
                 .map(TextParserUtils::formatText)
                 .reduce(Text.empty(), (mutableText, text1) -> mutableText.copy().append("\n").append(text1));
     }
 
-    private Text noBypassSlotsGroupDisconnectMessage() {
-        return Arrays.stream(MIFWhitelist.CONFIG.noBypassSlotsGroupDisconnectMessage())
-                .map(TextParserUtils::formatText)
-                .reduce(Text.empty(), (mutableText, text1) -> mutableText.copy().append("\n").append(text1));
-    }
-
-    private void checkGroups(Collection<Group> groups, MinecraftServer server, Runnable onAccessFailure, Runnable onBypassSlotsFailure) {
+    private void checkGroups(Collection<Group> groups, MinecraftServer server, Runnable onAccessFailure, Runnable onBypassSlotsFailure, Runnable onBypassMaintenanceFailure) {
         val hasAccessGroup = groups.stream().anyMatch(group -> group.getName().equals(MIFWhitelist.CONFIG.accessGroup()));
+
+        if (MIFWhitelist.CONFIG.maintenanceMode()) {
+            val hasBypassMaintenanceGroup = groups.stream().anyMatch(group -> group.getName().equals(MIFWhitelist.CONFIG.bypassMaintenanceGroup()));
+
+            if (hasBypassMaintenanceGroup) return;
+
+            onBypassMaintenanceFailure.run();
+            return;
+        }
 
         if (!hasAccessGroup) {
             onAccessFailure.run();
