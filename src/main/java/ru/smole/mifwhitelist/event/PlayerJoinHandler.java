@@ -1,11 +1,13 @@
 package ru.smole.mifwhitelist.event;
 
+import com.mojang.authlib.GameProfile;
 import eu.pb4.placeholders.api.TextParserUtils;
 import lombok.experimental.UtilityClass;
 import lombok.val;
 import net.luckperms.api.model.group.Group;
+import net.minecraft.network.ClientConnection;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
+import net.minecraft.server.network.ServerLoginNetworkHandler;
 import net.minecraft.text.Text;
 import ru.smole.mifwhitelist.MIFWhitelist;
 import ru.smole.mifwhitelist.util.LuckPermsUtil;
@@ -16,13 +18,13 @@ import java.util.Collection;
 @UtilityClass
 public class PlayerJoinHandler {
 
-    public void onJoin(ServerPlayNetworkHandler handler, MinecraftServer server) {
+    public void onJoin(ClientConnection connection, GameProfile profile, MinecraftServer server) {
         LuckPermsUtil.getUser(
-                handler.player.getUuid(),
+                profile.getId(),
                 user -> checkGroups(user.getInheritedGroups(user.getQueryOptions()), server,
-                        () -> handler.disconnect(message(MIFWhitelist.CONFIG.noAccessGroupDisconnectMessage())),
-                        () -> handler.disconnect(message(MIFWhitelist.CONFIG.noBypassSlotsGroupDisconnectMessage())),
-                        () -> handler.disconnect(message(MIFWhitelist.CONFIG.noBypassMaintenanceGroupDisconnectMessage()))
+                        () -> connection.disconnect(message(MIFWhitelist.CONFIG.noAccessGroupDisconnectMessage())),
+                        () -> connection.disconnect(message(MIFWhitelist.CONFIG.noBypassSlotsGroupDisconnectMessage())),
+                        () -> connection.disconnect(message(MIFWhitelist.CONFIG.noBypassMaintenanceGroupDisconnectMessage()))
         ));
     }
 

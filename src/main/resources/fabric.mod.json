@@ -17,6 +17,9 @@
       "ru.smole.mifwhitelist.MIFWhitelist"
     ]
   },
+  "mixins": [
+    "mifwhitelist.mixin.json"
+  ],
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric": "*",
