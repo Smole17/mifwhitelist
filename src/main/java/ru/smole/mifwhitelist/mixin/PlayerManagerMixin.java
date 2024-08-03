@@ -3,7 +3,8 @@ package ru.smole.mifwhitelist.mixin;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerLoginNetworkHandler;
+import net.minecraft.server.PlayerManager;
+import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -11,19 +12,18 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import ru.smole.mifwhitelist.event.PlayerJoinHandler;
 
-@Mixin(ServerLoginNetworkHandler.class)
-public class ServerLoginNetworkHandlerMixin {
-    
-    @Shadow private @Nullable GameProfile profile;
+import java.net.SocketAddress;
+
+@Mixin(PlayerManager.class)
+public class PlayerManagerMixin {
     
     @Shadow @Final private MinecraftServer server;
     
-    @Shadow @Final public ClientConnection connection;
-    
-    @Inject(at = @At(shift = At.Shift.BEFORE, value = "INVOKE", target = "Lnet/minecraft/server/network/ServerLoginNetworkHandler;addToServer(Lnet/minecraft/server/network/ServerPlayerEntity;)V"), method = "acceptPlayer")
-    public void onAcceptPlayer(CallbackInfo ci) {
-        PlayerJoinHandler.onJoin(connection, profile, server);
+    @Inject(at = @At(value = "RETURN"), method = "checkCanJoin", cancellable = true)
+    public void checkCanJoin(SocketAddress address, GameProfile profile, CallbackInfoReturnable<Text> cir) {
+        cir.setReturnValue(PlayerJoinHandler.onJoin(profile, server));
     }
 }

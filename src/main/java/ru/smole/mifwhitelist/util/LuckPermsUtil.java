@@ -1,5 +1,6 @@
 package ru.smole.mifwhitelist.util;
 
+import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
@@ -10,10 +11,11 @@ import java.util.function.Consumer;
 @UtilityClass
 public class LuckPermsUtil {
 
-    public void getUser(UUID uuid, Consumer<User> consumer) {
-        LuckPermsProvider.get()
+    @SneakyThrows
+    public User getUser(UUID uuid) {
+        return LuckPermsProvider.get()
                 .getUserManager()
                 .loadUser(uuid)
-                .thenAccept(consumer);
+                .get();
     }
 }

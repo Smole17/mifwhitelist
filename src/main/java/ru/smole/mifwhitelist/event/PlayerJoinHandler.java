@@ -7,7 +7,6 @@ import lombok.val;
 import net.luckperms.api.model.group.Group;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerLoginNetworkHandler;
 import net.minecraft.text.Text;
 import ru.smole.mifwhitelist.MIFWhitelist;
 import ru.smole.mifwhitelist.util.LuckPermsUtil;
@@ -17,51 +16,44 @@ import java.util.Collection;
 
 @UtilityClass
 public class PlayerJoinHandler {
-
-    public void onJoin(ClientConnection connection, GameProfile profile, MinecraftServer server) {
-        LuckPermsUtil.getUser(
-                profile.getId(),
-                user -> checkGroups(user.getInheritedGroups(user.getQueryOptions()), server,
-                        () -> connection.disconnect(message(MIFWhitelist.CONFIG.noAccessGroupDisconnectMessage())),
-                        () -> connection.disconnect(message(MIFWhitelist.CONFIG.noBypassSlotsGroupDisconnectMessage())),
-                        () -> connection.disconnect(message(MIFWhitelist.CONFIG.noBypassMaintenanceGroupDisconnectMessage()))
-        ));
+    
+    public Text onJoin(GameProfile profile, MinecraftServer server) {
+        val user = LuckPermsUtil.getUser(profile.getId());
+        
+        return checkGroups(user.getInheritedGroups(user.getQueryOptions()), server);
     }
-
+    
     private Text message(String[] message) {
         return Arrays.stream(message)
-                .map(TextParserUtils::formatText)
-                .reduce(Text.empty(), (mutableText, text1) -> mutableText.copy().append("\n").append(text1));
+            .map(TextParserUtils::formatText)
+            .reduce(Text.empty(), (mutableText, text1) -> mutableText.copy().append("\n").append(text1));
     }
-
-    private void checkGroups(Collection<Group> groups, MinecraftServer server, Runnable onAccessFailure, Runnable onBypassSlotsFailure, Runnable onBypassMaintenanceFailure) {
+    
+    private Text checkGroups(Collection<Group> groups, MinecraftServer server) {
         val hasAccessGroup = groups.stream().anyMatch(group -> group.getName().equals(MIFWhitelist.CONFIG.accessGroup()));
-
+        
         if (MIFWhitelist.CONFIG.maintenanceMode()) {
             val hasBypassMaintenanceGroup = groups.stream().anyMatch(group -> group.getName().equals(MIFWhitelist.CONFIG.bypassMaintenanceGroup()));
-
-            if (hasBypassMaintenanceGroup) return;
-
-            onBypassMaintenanceFailure.run();
-            return;
+            
+            if (hasBypassMaintenanceGroup) return null;
+            
+            return message(MIFWhitelist.CONFIG.noBypassMaintenanceGroupDisconnectMessage());
         }
-
-        if (!hasAccessGroup) {
-            onAccessFailure.run();
-            return;
-        }
-
-        checkBypassSlotsGroup(server, groups, onBypassSlotsFailure);
+        
+        if (!hasAccessGroup) return message(MIFWhitelist.CONFIG.noAccessGroupDisconnectMessage());
+        
+       return checkBypassSlotsGroup(server, groups);
     }
-
-    private void checkBypassSlotsGroup(MinecraftServer server, Collection<Group> groups, Runnable onFailure) {
+    
+    private Text checkBypassSlotsGroup(MinecraftServer server, Collection<Group> groups) {
         val players = server.getServerMetadata().getPlayers();
-
+        
         if (players == null || players.getPlayerLimit() - players.getOnlinePlayerCount() > MIFWhitelist.CONFIG.bypassSlots())
-            return;
-
+            return null;
+        
         val hasBypassSlotsGroup = groups.stream().anyMatch(group -> group.getName().equals(MIFWhitelist.CONFIG.bypassSlotsGroup()));
-
-        if (!hasBypassSlotsGroup) onFailure.run();
+        
+        if (!hasBypassSlotsGroup) return message(MIFWhitelist.CONFIG.noBypassSlotsGroupDisconnectMessage());
+        return null;
     }
 }

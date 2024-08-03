@@ -3,7 +3,7 @@
 	"package": "ru.smole.mifwhitelist.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
-		"ServerLoginNetworkHandlerMixin"
+    "PlayerManagerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
