@@ -5,7 +5,6 @@ import eu.pb4.placeholders.api.TextParserUtils;
 import lombok.experimental.UtilityClass;
 import lombok.val;
 import net.luckperms.api.model.group.Group;
-import net.minecraft.network.ClientConnection;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
 import ru.smole.mifwhitelist.MIFWhitelist;
@@ -48,7 +47,7 @@ public class PlayerJoinHandler {
     private Text checkBypassSlotsGroup(MinecraftServer server, Collection<Group> groups) {
         val players = server.getServerMetadata().getPlayers();
         
-        if (players == null || players.getPlayerLimit() - players.getOnlinePlayerCount() > MIFWhitelist.CONFIG.bypassSlots())
+        if (players == null || server.getMaxPlayerCount() - players.getOnlinePlayerCount() > MIFWhitelist.CONFIG.bypassSlots())
             return null;
         
         val hasBypassSlotsGroup = groups.stream().anyMatch(group -> group.getName().equals(MIFWhitelist.CONFIG.bypassSlotsGroup()));
