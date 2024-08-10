@@ -41,7 +41,7 @@ public class PlayerJoinHandler {
         
         if (!hasAccessGroup) return message(MIFWhitelist.CONFIG.noAccessGroupDisconnectMessage());
         
-       return checkBypassSlotsGroup(server, groups);
+        return null;
     }
     
     private Text checkBypassSlotsGroup(MinecraftServer server, Collection<Group> groups) {
