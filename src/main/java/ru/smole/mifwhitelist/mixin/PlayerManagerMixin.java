@@ -19,7 +19,7 @@ public class PlayerManagerMixin {
     
     @Shadow @Final private MinecraftServer server;
     
-    @Inject(at = @At(value = "TAIL"), method = "checkCanJoin", cancellable = true)
+    @Inject(at = @At(value = "HEAD"), method = "checkCanJoin", cancellable = true)
     public void checkCanJoin(SocketAddress address, GameProfile profile, CallbackInfoReturnable<Text> cir) {
         cir.setReturnValue(PlayerJoinHandler.onJoin(profile, server));
     }
