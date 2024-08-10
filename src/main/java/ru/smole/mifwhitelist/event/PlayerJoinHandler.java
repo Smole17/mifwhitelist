@@ -47,7 +47,7 @@ public class PlayerJoinHandler {
     private Text checkBypassSlotsGroup(MinecraftServer server, Collection<Group> groups) {
         val players = server.getServerMetadata().getPlayers();
         
-        if (players == null || server.getMaxPlayerCount() - players.getOnlinePlayerCount() > MIFWhitelist.CONFIG.bypassSlots())
+        if (players == null || server.getMaxPlayerCount() - server.getCurrentPlayerCount() > MIFWhitelist.CONFIG.bypassSlots())
             return null;
         
         val hasBypassSlotsGroup = groups.stream().anyMatch(group -> group.getName().equals(MIFWhitelist.CONFIG.bypassSlotsGroup()));
